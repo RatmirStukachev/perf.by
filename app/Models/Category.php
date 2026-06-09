@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Carbon;
 use App\Models\Traits\UsedFunctions;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Category extends Model
 {
@@ -35,11 +35,16 @@ class Category extends Model
 
     public function getLink(): string
     {
-        return match ($this->level) {
+        return match ((int) $this->level) {
             1 => route('catalog.level1', $this),
-            2 => route('catalog.level2', [$this->parent, $this]),
+            2 => route('catalog.level2', [($this->parent_id ? self::find($this->parent_id) : null) ?? $this, $this]),
             default => route('catalog.index'),
         };
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'category_id', 'id')->where('is_active', true);
     }
 
     public function categories(): HasMany
@@ -55,6 +60,27 @@ class Category extends Model
     public function parent(): hasOne
     {
         return $this->hasOne(self::class, 'id', 'parent_id')->where('is_active', true);
+    }
+
+    public function parentRaw(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function getRawSelfAndAllParentIds(): array
+    {
+        $ids = [$this->id];
+        $current = $this;
+
+        while ($current->parent_id) {
+            $current = self::find($current->parent_id);
+            if (! $current) {
+                break;
+            }
+            $ids[] = $current->id;
+        }
+
+        return $ids;
     }
 
     public function getAllParentIds(): array
@@ -136,17 +162,17 @@ class Category extends Model
 
     public function isFirstLevel(): bool
     {
-        return $this->level === 1;
+        return (int) $this->level === 1;
     }
 
     public function isSecondLevel(): bool
     {
-        return $this->level === 2;
+        return (int) $this->level === 2;
     }
 
     public function isThirdLevel(): bool
     {
-        return $this->level === 3;
+        return (int) $this->level === 3;
     }
 
     public function neighbors(): HasMany
@@ -166,7 +192,7 @@ class Category extends Model
     protected function getOnlyChildrenIds(): array
     {
         $ids = [];
-        foreach($this->childrenIds as $child) {
+        foreach ($this->childrenIds as $child) {
             $ids[] = $child->id;
             if ($child->childrenIds->isNotEmpty()) {
                 $ids = array_merge($ids, $child->getOnlyChildrenIds());
@@ -212,10 +238,10 @@ class Category extends Model
             $options[$category->id] = $category->title;
 
             foreach ($category->child as $childCategory) {
-                $options[$childCategory->id] = '⤷ ' . $childCategory->title;
+                $options[$childCategory->id] = '⤷ '.$childCategory->title;
 
                 foreach ($childCategory->child as $grandChildCategory) {
-                    $options[$grandChildCategory->id] = ' ⤷⤷ ' . $grandChildCategory->title;
+                    $options[$grandChildCategory->id] = ' ⤷⤷ '.$grandChildCategory->title;
                 }
             }
         }
@@ -237,10 +263,10 @@ class Category extends Model
             $options[$category->id] = $category->title;
 
             foreach ($category->child as $childCategory) {
-                $options[$childCategory->id] = '⤷ ' . $childCategory->title;
+                $options[$childCategory->id] = '⤷ '.$childCategory->title;
 
                 foreach ($childCategory->child as $grandChildCategory) {
-                    $options[$grandChildCategory->id] = ' ⤷⤷ ' . $grandChildCategory->title;
+                    $options[$grandChildCategory->id] = ' ⤷⤷ '.$grandChildCategory->title;
                 }
             }
         }
@@ -250,16 +276,24 @@ class Category extends Model
 
     public function isActiveThreeLevels(): bool
     {
+        if (! $this->is_active) {
+            return false;
+        }
+
+        $rawParent = $this->parent_id ? self::find($this->parent_id) : null;
+
         if ($this->isFirstLevel()) {
-            return $this->is_active;
+            return true;
         }
 
         if ($this->isSecondLevel()) {
-            return $this->parent?->is_active;
+            return (bool) $rawParent?->is_active;
         }
 
         if ($this->isThirdLevel()) {
-            return $this->parent?->parent?->is_active;
+            $grandParent = $rawParent?->parent_id ? self::find($rawParent->parent_id) : null;
+
+            return (bool) ($rawParent?->is_active && $grandParent?->is_active);
         }
 
         return false;

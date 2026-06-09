@@ -14,6 +14,7 @@ enum PageContentEnum: string
     case main_news = 'Главная страница: Новости';
     case product_delivery = 'Товар: Доставка (Сквозной блок)';
     case cart_delivery = 'Корзина: Доставка (Сквозной блок)';
+    case callback_form = 'Форма обратной связи';
 
     public static function valueOne($name)
     {

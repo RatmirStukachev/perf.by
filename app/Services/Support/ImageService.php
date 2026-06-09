@@ -2,27 +2,28 @@
 
 namespace App\Services\Support;
 
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\ImageManager;
+use Throwable;
 
 class ImageService
 {
-
     protected $filePath;
+
     protected $sizes;
+
     protected $options;
+
     protected $webp;
+
     protected $watermark;
+
     protected $fullPath;
 
-    /**
-     * @param $filePath
-     * @param $sizes
-     * @param $options
-     * @param $webp
-     * @param $watermark
-     */
     public function __construct($filePath, $sizes = null, $options = null, $webp = false, $watermark = false)
     {
         $this->filePath = $filePath;
@@ -33,7 +34,6 @@ class ImageService
         $this->fullPath = $filePath ? Storage::path($filePath) : config('image_service.noThumb'); // Определяем полный путь файла при создании экземпляра класса
     }
 
-
     /**
      * @return \Illuminate\Config\Repository|\Illuminate\Foundation\Application|mixed|string|null
      */
@@ -41,7 +41,7 @@ class ImageService
     {
         $imagePath = $this->getImagePath();
 
-        if (!$imagePath) {
+        if (! $imagePath) {
             return config('image_service.noThumb');
         }
 
@@ -51,44 +51,58 @@ class ImageService
             return $imagePath;
         }
 
-        [$widthOriginal, $heightOriginal] = getimagesize($this->fullPath);
+        $originalSize = @getimagesize($this->fullPath);
+
+        if ($originalSize === false) {
+            Log::warning('ImageService: failed to read image size, using noThumb', [
+                'filePath' => $this->filePath,
+                'fullPath' => $this->fullPath,
+            ]);
+
+            return config('image_service.noThumb');
+        }
+
+        [$widthOriginal, $heightOriginal] = $originalSize;
+
+        if ($widthOriginal <= 0 || $heightOriginal <= 0) {
+            return config('image_service.noThumb');
+        }
+
         [$widthResize, $heightResize] = $this->getResizeDimensions($widthOriginal, $heightOriginal);
 
         return $this->processImage($widthResize, $heightResize);
     }
 
-
     /**
      * @return string|null
-     * Проверка наличия оригинального файла
+     *                     Проверка наличия оригинального файла
      */
     private function getImagePath()
     {
         return $this->filePath && Storage::disk('public')->exists($this->filePath)
-            ? 'storage/' . $this->filePath
+            ? 'storage/'.$this->filePath
             : null;
     }
 
     /**
      * @return string|null
-     * Получение размеров для нарезки
+     *                     Получение размеров для нарезки
      */
     private function getResizeDimensions($widthOriginal, $heightOriginal)
     {
         $width = $this->sizes[0] ?? $widthOriginal;
         $height = $this->sizes[1] ?? $heightOriginal;
+
         return [$width, $height];
     }
 
     /**
-     * @param $width
-     * @param $height
      * @return string
-     * Нарезка изображения
+     *                Нарезка изображения
      */
-
     private function processImage($width, $height)
     {
+        /** @var FilesystemAdapter $storage */
         $storage = Storage::disk('public');
         $thumbPath = $this->getThumbPath($width, $height);
 
@@ -96,8 +110,28 @@ class ImageService
             return Storage::url($thumbPath);
         }
 
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($this->fullPath);
+        $manager = new ImageManager(new Driver);
+        try {
+            $image = $manager->read($this->fullPath);
+        } catch (DecoderException $e) {
+            Log::warning('ImageService: failed to decode image, using noThumb', [
+                'filePath' => $this->filePath,
+                'fullPath' => $this->fullPath,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return config('image_service.noThumb');
+        } catch (Throwable $e) {
+            Log::warning('ImageService: unexpected image processing error, using noThumb', [
+                'filePath' => $this->filePath,
+                'fullPath' => $this->fullPath,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return config('image_service.noThumb');
+        }
 
         $image = $this->setImageSizes($image, $width, $height);
 
@@ -115,16 +149,13 @@ class ImageService
     }
 
     /**
-     * @param $width
-     * @param $height
      * @return string
-     *  Получение пути для нарезанного изображения
- */
-
+     *                Получение пути для нарезанного изображения
+     */
     private function getThumbPath($width, $height)
     {
-        $filePrefix = 'w' . $width . '_h' . $height . '_';
-        $thumbFolder = config('image_service.thumbPath') . dirname($this->filePath);
+        $filePrefix = 'w'.$width.'_h'.$height.'_';
+        $thumbFolder = config('image_service.thumbPath').dirname($this->filePath);
 
         if ($this->webp) {
             $filePathArray = explode('.', $this->filePath);
@@ -133,19 +164,15 @@ class ImageService
 
         Storage::disk('public')->makeDirectory($thumbFolder);
 
-        return $thumbFolder . '/' . $filePrefix . basename($this->filePath);
+        return $thumbFolder.'/'.$filePrefix.basename($this->filePath);
     }
 
     /**
-     * @param $img
-     * @param $width
-     * @param $height
      * @return mixed
-     * Нарезка разными способомами
-     * cover  - вписывает в заданный размер, вырезает часть изображения (left right center)
-     * contain - вписывается в заданный размер, пустые области становятся белыми
+     *               Нарезка разными способомами
+     *               cover  - вписывает в заданный размер, вырезает часть изображения (left right center)
+     *               contain - вписывается в заданный размер, пустые области становятся белыми
      */
-
     private function setImageSizes($img, $width, $height)
     {
         return match ($this->options[0]) {
@@ -155,9 +182,9 @@ class ImageService
     }
 
     /**
-     * @param $filePath
+     * @param  $filePath
      * @return mixed|string|null
-     * Определение MIME файла
+     *                           Определение MIME файла
      */
     public function getMime()
     {
@@ -169,16 +196,13 @@ class ImageService
     }
 
     /**
-     * @param $image
-     * @param $width
-     * @param $height
      * @return mixed
-     * Вставка Watermark
+     *               Вставка Watermark
      */
     private function setWatermark($image, $width, $height)
     {
         $watermarkPath = Storage::path('watermark.png');
-        $manager = new ImageManager(new Driver());
+        $manager = new ImageManager(new Driver);
         $watermarkImage = $manager->read($watermarkPath);
         $watermarkImage->scale($width * 0.3, $height * 0.3);
         $image->place(

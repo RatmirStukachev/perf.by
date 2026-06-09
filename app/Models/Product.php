@@ -6,9 +6,6 @@ use App\Models\Traits\UsedFunctions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Characteristic;
 
 class Product extends Model
 {
@@ -44,19 +41,21 @@ class Product extends Model
 
     public function activeCharacteristics(): BelongsToMany
     {
+        $categoryIds = $this->category?->getRawSelfAndAllParentIds() ?? [];
+
         return $this->belongsToMany(Characteristic::class, 'product_characteristic', 'product_id', 'characteristic_id')
             ->withPivot('value')
-            ->whereIn('characteristic_id', function($query) {
+            ->whereIn('characteristic_id', function ($query) use ($categoryIds) {
                 $query->select('characteristic_id')
                     ->from('category_characteristic')
-                    ->whereIn('category_id', $this->category?->getSelfAndAllParentIds())
+                    ->whereIn('category_id', $categoryIds)
                     ->where('is_active', true);
             });
     }
 
     public function getAllCategoryParentIds(): array
     {
-        if (!$this->category) {
+        if (! $this->category) {
             return [];
         }
 
@@ -115,33 +114,56 @@ class Product extends Model
     public function getCategoryIds(): array
     {
         if ($this->category->isFirstLevel()) {
-            return  [$this->category_id];
+            return [$this->category_id];
         }
 
-
-        return $this->category->getSelfAndAllParentIds();        
+        return $this->category->getSelfAndAllParentIds();
     }
 
     public function isCategoriesActive(): bool
     {
-        if (!$this->category) {
+        if (! $this->category) {
+            // #region agent log
+            @file_put_contents(base_path('.cursor/debug-a60b13.log'), json_encode(['sessionId' => 'a60b13', 'hypothesisId' => 'H1', 'location' => 'Product.php:isCategoriesActive', 'message' => 'no category', 'data' => ['product_id' => $this->id], 'timestamp' => round(microtime(true) * 1000)])."\n", FILE_APPEND);
+
+            // #endregion
             return false;
         }
 
         $category = $this->category;
 
-        if ($category->isFirstLevel()) {
-            return $category->is_active;
+        if ($category->is_active) {
+            $result = $this->isRawCategoryChainActive($category);
+            // #region agent log
+            @file_put_contents(base_path('.cursor/debug-a60b13.log'), json_encode(['sessionId' => 'a60b13', 'hypothesisId' => 'H1', 'location' => 'Product.php:isCategoriesActive:activeChain', 'message' => 'direct chain check', 'data' => ['product_id' => $this->id, 'category_id' => $category->id, 'result' => $result], 'timestamp' => round(microtime(true) * 1000)])."\n", FILE_APPEND);
+
+            // #endregion
+            return $result;
         }
 
-        if ($category->isSecondLevel()) {
-            return $category->parent?->is_active;
+        $mappingExists = CategoryMapping::query()
+            ->where('source_category_id', $category->id)
+            ->whereHas('visibleCategory', fn ($q) => $q->where('is_active', true))
+            ->exists();
+
+        // #region agent log
+        @file_put_contents(base_path('.cursor/debug-a60b13.log'), json_encode(['sessionId' => 'a60b13', 'hypothesisId' => 'H1', 'location' => 'Product.php:isCategoriesActive:mapping', 'message' => 'mapping check for inactive source', 'data' => ['product_id' => $this->id, 'category_id' => $category->id, 'cat_title' => $category->title, 'mapping_exists' => $mappingExists], 'timestamp' => round(microtime(true) * 1000)])."\n", FILE_APPEND);
+        // #endregion
+
+        return $mappingExists;
+    }
+
+    private function isRawCategoryChainActive(Category $category): bool
+    {
+        $current = $category;
+
+        while ($current) {
+            if (! $current->is_active) {
+                return false;
+            }
+            $current = $current->parent_id ? Category::find($current->parent_id) : null;
         }
 
-        if ($category->isThirdLevel()) {
-            return $category->parent?->parent?->is_active;
-        }
-
-        return false;
+        return true;
     }
 }

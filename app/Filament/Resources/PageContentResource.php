@@ -2,34 +2,35 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\PageContent;
 use App\Enums\PageContentEnum;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\PageContentResource\Pages;
-use App\Filament\Resources\PageContentResource\RelationManagers;
-use App\Filament\Resources\PageContentResource\Forms\MainFormForm;
-use App\Filament\Resources\PageContentResource\Forms\MainNewsForm;
-use App\Filament\Resources\PageContentResource\Forms\MainTechForm;
-use App\Filament\Resources\PageContentResource\Forms\MainSlideForm;
+use App\Filament\Resources\PageContentResource\Forms\AboutSliderForm;
+use App\Filament\Resources\PageContentResource\Forms\CallBackForm;
+use App\Filament\Resources\PageContentResource\Forms\CartDeliveryForm;
 use App\Filament\Resources\PageContentResource\Forms\MainAdviseForm;
+use App\Filament\Resources\PageContentResource\Forms\MainArrivalsForm;
 use App\Filament\Resources\PageContentResource\Forms\MainBlocksForm;
 use App\Filament\Resources\PageContentResource\Forms\MainBrandsForm;
 use App\Filament\Resources\PageContentResource\Forms\MainDirectForm;
-use App\Filament\Resources\PageContentResource\Forms\MainSecondForm;
-use App\Filament\Resources\PageContentResource\Forms\AboutSliderForm;
+use App\Filament\Resources\PageContentResource\Forms\MainFormForm;
+use App\Filament\Resources\PageContentResource\Forms\MainNewsForm;
 use App\Filament\Resources\PageContentResource\Forms\MainPopularForm;
 use App\Filament\Resources\PageContentResource\Forms\MainRequestForm;
-use App\Filament\Resources\PageContentResource\Forms\CartDeliveryForm;
-use App\Filament\Resources\PageContentResource\Forms\MainArrivalsForm;
+use App\Filament\Resources\PageContentResource\Forms\MainSecondForm;
+use App\Filament\Resources\PageContentResource\Forms\MainSlideForm;
+use App\Filament\Resources\PageContentResource\Forms\MainTechForm;
 use App\Filament\Resources\PageContentResource\Forms\ProductDeliveryForm;
+use App\Filament\Resources\PageContentResource\Pages;
+use App\Filament\Resources\PageContentResource\RelationManagers;
+use App\Models\PageContent;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
 class PageContentResource extends Resource
@@ -77,6 +78,7 @@ class PageContentResource extends Resource
                     PageContentEnum::main_news->name => MainNewsForm::get(),
                     PageContentEnum::product_delivery->name => ProductDeliveryForm::get(),
                     PageContentEnum::cart_delivery->name => CartDeliveryForm::get(),
+                    PageContentEnum::callback_form->name => CallBackForm::get(),
                 };
             })->columns(1);
     }

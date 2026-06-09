@@ -2,6 +2,7 @@
     $cartCount = app(App\Services\CartService::class)->getCartCount();
 @endphp
 
+
 <section class="s-header-mobile w-mobile-header-btns">
     <div class="container-fluid">
         <div class="row row-h-mobile align-items-center justify-content-between">
@@ -12,7 +13,11 @@
             </div>
             <div class="col-right col col-auto">
                 <div class="row lg-lg-gutters md-md-gutters sm-sm-gutters xxxs-no-gutters align-items-center justify-content-end">
-                    
+                    <div class="col-auto">
+                        <a href="" class="mobile-btn__link fcm search _js-b-mobile-search">
+                            <svg version="1.1" width="22" height="22" enable-background="new 0 0 515.558 515.558" viewBox="0 0 515.558 515.558" xmlns="http://www.w3.org/2000/svg"><path d="m378.344 332.78c25.37-34.645 40.545-77.2 40.545-123.333 0-115.484-93.961-209.445-209.445-209.445s-209.444 93.961-209.444 209.445 93.961 209.445 209.445 209.445c46.133 0 88.692-15.177 123.337-40.547l137.212 137.212 45.564-45.564c0-.001-137.214-137.213-137.214-137.213zm-168.899 21.667c-79.958 0-145-65.042-145-145s65.042-145 145-145 145 65.042 145 145-65.043 145-145 145z"></path></svg>
+                        </a>
+                    </div>
                     <div class="col-auto">
                         <a href="{{ route('cart.index') }}" class="mobile-btn__link fcm cart @if ($cartCount > 0) _active @endif">
                             <div class="count">{{ $cartCount }}</div>
@@ -419,6 +424,20 @@
                         </div>
                         <div class="title">Корзина</div>
                     </a>
+                </div>
+                <div class="col-header-search col-12 col pb-10">
+                    <div class="w-header-search">
+                        <form action="{{ route('search') }}" method="get">
+                            <div class="search">
+                                <input type="text" name="query" id="site-search-input" class="input__default" placeholder="Поиск по сайту" autocomplete="off">
+                                <div class="w-btn">
+                                    <button type="submit" class="button fcm">
+                                        <svg version="1.1" width="20px" height="20px" enable-background="new 0 0 515.558 515.558" viewBox="0 0 515.558 515.558" xmlns="http://www.w3.org/2000/svg"><path d="m378.344 332.78c25.37-34.645 40.545-77.2 40.545-123.333 0-115.484-93.961-209.445-209.445-209.445s-209.444 93.961-209.444 209.445 93.961 209.445 209.445 209.445c46.133 0 88.692-15.177 123.337-40.547l137.212 137.212 45.564-45.564c0-.001-137.214-137.213-137.214-137.213zm-168.899 21.667c-79.958 0-145-65.042-145-145s65.042-145 145-145 145 65.042 145 145-65.043 145-145 145z"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

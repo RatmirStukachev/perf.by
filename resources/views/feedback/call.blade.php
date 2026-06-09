@@ -11,8 +11,12 @@
                     <svg viewBox="0 0 769 430" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.59022 14.4169C-1.39401 7.67752 3.5504 0 10.921 0H759C764.523 0 769 4.47715 769 10V420C769 425.523 764.523 430 759 430H11.1246C3.70425 430 -1.23397 422.216 1.85034 415.467C17.6965 380.793 55.6681 291.215 57.4024 225.5C59.3298 152.469 18.0165 51.5129 1.59022 14.4169Z" fill="url(#index-callback-content-frame-gradient)"/><defs><linearGradient id="index-callback-content-frame-gradient" x1="382" y1="0" x2="382" y2="430" gradientUnits="userSpaceOnUse"><stop stop-color="#FF5F00"/><stop offset="1" stop-color="#FF5F00"/></linearGradient></defs></svg>
                 </div>
                 <div class="content">
-                    <div class="s-name _h3 semibold lg-mb-15 mb-10 align-md-left align-center">У вас есть вопрос?</div>
-                    <div class="s-name description _h6 lg-mb-10 mb-10">Заполни форму и погрузись в уникальную атмосферу  приключений. Впечатляющая игра актеров, большие локации и увлекательные сюжеты никого не оставят равнодушным.</div>
+                    @if ($callback_form ?? false && $callback_form['title'])
+                        <div class="s-name _h3 semibold lg-mb-15 mb-10 align-md-left align-center">{{ $callback_form['title'] }}</div>
+                    @endif
+                    @if ($callback_form ?? false && $callback_form['desc'])
+                        <div class="s-name description _h6 lg-mb-10 mb-10">{!! $callback_form['desc'] !!}</div>
+                    @endif
                     <div class="row lg-lg-gutters sm-gutters">
                         <div class="col-sm-6 col-12 col">
                             <div class="input input-icon-left person lg-mt-15 mt-10">

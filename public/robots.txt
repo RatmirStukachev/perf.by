@@ -1,2 +1,6 @@
 User-agent: *
-Disallow: /
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /order/
+
+Sitemap: https:/perf.by/sitemap.xml

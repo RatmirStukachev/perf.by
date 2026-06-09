@@ -1,27 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Barryvdh\Debugbar\Facades\Debugbar;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SearchController;
+use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SitemapController;
 
-if(request()->ip() == '82.209.222.116') {
+if (request()->ip() == '82.209.222.116') {
     Debugbar::enable();
 }
 
+
 Route::get('/', [HomeController::class, 'index'])->name('index');
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 Route::prefix('catalog')->name('catalog.')->group(function () {
     Route::get('/', [CategoryController::class, 'getCatalog'])->name('index');
-    
+
     Route::get('/{category:slug}', [CategoryController::class, 'showLevel1'])->name('level1');
-    
+
     Route::get('/{parent:slug}/{category:slug}', [CategoryController::class, 'showLevel2'])->name('level2');
 });
+
+Route::get('/search', [SearchController::class, 'search'])->name('search');
 
 Route::get('/product/{product:slug}', [ProductController::class, 'getProduct'])->name('product');
 

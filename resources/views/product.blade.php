@@ -242,4 +242,49 @@
             </div>
         </section>
     @endif
+    
+    @php
+        $schema = [
+            '@context' => 'https://schema.org/',
+            '@type' => 'Product',
+            'name' => $page->title,
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => request()->url(),
+                'priceCurrency' => 'BYN',
+                'availability' => $page->balance > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                'seller' => [
+                    '@type' => 'Organization',
+                    'name' => 'perf.by'
+                ]
+            ]
+        ];
+
+        if ($page->getAllImages() && count($page->getAllImages()) > 0) {
+            $schema['image'] = [asset('storage/' . $page->getAllImages()[0])];
+        }
+
+        if ($page->desc || $page->content) {
+            $schema['description'] = strip_tags($page->desc ?: $page->content);
+        }
+
+        if ($page->article) {
+            $schema['sku'] = $page->article;
+        }
+
+        if ($page->brand) {
+            $schema['brand'] = [
+                '@type' => 'Brand',
+                'name' => $page->brand->title
+            ];
+        }
+
+        if ($page->price > 0) {
+            $schema['offers']['price'] = $page->price;
+        }
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    
 @endsection

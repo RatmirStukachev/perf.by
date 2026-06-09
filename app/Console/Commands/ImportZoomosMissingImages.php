@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Services\ZoomosImportService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\ZoomosImportService;
 
-class ImportZoomosUpdateProducts extends Command
+class ImportZoomosMissingImages extends Command
 {
-    protected $signature = 'zoomos:import-update';
+    protected $signature = 'zoomos:import-missing-images';
 
-    protected $description = 'Update existing products from Zoomos API (price, status, title)';
+    protected $description = 'Download images from Zoomos for products without image';
 
     public function __construct(private ZoomosImportService $importService)
     {
@@ -19,6 +20,8 @@ class ImportZoomosUpdateProducts extends Command
 
     public function handle(): int
     {
+        \DB::connection()->getPdo()->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+
         $apiKey = config('services.zoomos.api_key');
 
         if (empty($apiKey)) {
@@ -27,13 +30,13 @@ class ImportZoomosUpdateProducts extends Command
             return self::FAILURE;
         }
 
-        $this->info('Starting Zoomos update-only import...');
-        Log::info('Starting Zoomos update-only import...');
+        $this->info('Starting Zoomos missing images import...');
+        Log::info('Starting Zoomos missing images import...');
         $this->newLine();
 
         $progressBar = null;
 
-        $stats = $this->importService->updateExistingProducts($apiKey, function ($processed, $total) use (&$progressBar) {
+        $stats = $this->importService->downloadMissingImages($apiKey, function ($processed, $total) use (&$progressBar) {
             if (! $progressBar) {
                 $progressBar = $this->output->createProgressBar($total);
                 $progressBar->setFormat('verbose');
@@ -47,14 +50,13 @@ class ImportZoomosUpdateProducts extends Command
             $this->newLine(2);
         }
 
-        Log::info('Zoomos update-only import stats', $stats);
-        $this->info('Update-only import completed!');
+        Log::info('Zoomos missing images import stats', $stats);
+        $this->info('Missing images import completed!');
         $this->table(
             ['Metric', 'Count'],
             [
-                ['Updated', $stats['updated']],
+                ['Downloaded', $stats['downloaded']],
                 ['Skipped', $stats['skipped']],
-                ['Deactivated', $stats['deactivated']],
                 ['Total processed', $stats['total']],
             ]
         );

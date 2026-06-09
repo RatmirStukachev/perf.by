@@ -2,16 +2,17 @@
 
 namespace App\Providers;
 
-use Filament\Facades\Filament;
-use Illuminate\Support\Facades\DB;
+use App\ViewComposers\CallBackFormComposer;
+use App\ViewComposers\CartDeliveryComposer;
+use App\ViewComposers\ContactsComposer;
+use App\ViewComposers\MenuCategoriesComposer;
 use App\ViewComposers\MenuComposer;
 use App\ViewComposers\MetricsComposer;
-use App\ViewComposers\ContactsComposer;
-use Illuminate\Support\ServiceProvider;
-use Filament\Navigation\NavigationGroup;
-use App\ViewComposers\CartDeliveryComposer;
 use App\ViewComposers\ProductBlockComposer;
-use App\ViewComposers\MenuCategoriesComposer;
+use Filament\Facades\Filament;
+use Filament\Navigation\NavigationGroup;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\ServiceProvider;
 
 class ComposerServiceProvider extends ServiceProvider
 {
@@ -60,6 +61,10 @@ class ComposerServiceProvider extends ServiceProvider
 
         view()->composer(
             ['cart'], CartDeliveryComposer::class,
+        );
+
+        view()->composer(
+            ['*'], CallBackFormComposer::class,
         );
     }
 }

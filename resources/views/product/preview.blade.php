@@ -35,12 +35,12 @@
                     <div class="image">
                         <a href="{{ route('product', $product) }}" class="block__link">
                             <picture>
-                                <img src="{{(new zImage($product->image, [222, 222], ['contain']))->resize()}}" alt="{{ $product->title }}" title="{{ $product->title }}" class="img block" loading="lazy"
+                                <img src="{{(new zImage($product->image, [283, 283], ['contain']))->resize()}}" alt="{{ $product->title }}" title="{{ $product->title }}" class="img block" loading="lazy"
                                 @if (!$product->image) style="aspect-ratio: 1/1; object-fit: cover; object-position: center;" @endif
                                 >
                                 @if(env('WEBP'))
                                     <source
-                                        srcset="{{(new zImage($product->image, [222, 222], ['contain'], true))->resize()}}">
+                                        srcset="{{(new zImage($product->image, [283, 283], ['contain'], true))->resize()}}">
                                 @endif
                             </picture>
                         </a>

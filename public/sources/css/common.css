@@ -136,6 +136,24 @@
 	border-radius: 12px;
 	overflow: hidden;
 }
+
+.row-submit .col-submit ~ .col-del {
+	flex: 0 0 60px;
+	max-width: 60px;
+}
+
+.row-submit .col-submit ~ .col-del .button {
+	background-color: #cecece;
+	border-color: #cecece;
+	width: 100%;
+	padding: 15px 17px;
+}
+
+.row-submit .col-submit ~ .col-del .button:hover {
+	background-color: #fdc1c1;
+	border-color: #ff9393;
+}
+
 @media (min-width: 576px) {
 	.slider-image.mobile {
 		background-image: none !important;
@@ -1076,8 +1094,8 @@ ul.ul-catalog-page-aside-nav .ul-inset .li._active>.__link {
 		border-radius: 0;
 	}
 	.s-index-slider .row-content {
-    min-height: 700px;
-    }
+		min-height: 700px;
+	}
 	.s-index-slider .content-offset {
 		padding-left: 15px;
 		padding-right: 15px;

@@ -29,7 +29,7 @@
                                             @if ((request()->route('category')?->id == $category->id && $category->hasChildren()) || (request()->route('parent')?->id == $category->id && $category->hasChildren()))
                                                 <div class="inset pt-15 pb-20">
                                                     <ul class="ul-inset">
-                                                        @foreach($category->children as $child)
+                                                        @foreach($category->children->sortBy('title') as $child)
                                                             <li class="li @if (request()->route('category')?->id == $child->id) _active @endif"><a href="{{ $child->getLink() }}" class="__link">{{ $child->h1 ?: $child->title }}</a></li>
                                                         @endforeach                                        
                                                     </ul>

@@ -10,26 +10,31 @@ Artisan::command('inspire', function () {
 
 
 Schedule::command('zoomos:import-categories')
-    ->dailyAt('01:00')
-    ->withoutOverlapping()
-    ->runInBackground();
-
-Schedule::command('zoomos:import-brands')
     ->dailyAt('02:00')
     ->withoutOverlapping()
     ->runInBackground();
 
+Schedule::command('zoomos:import-brands')
+    ->dailyAt('02:30')
+    ->withoutOverlapping()
+    ->runInBackground();
+
 Schedule::command('zoomos:import-characteristics')
-    ->dailyAt('03:00')
+    ->dailyAt('02:45')
     ->withoutOverlapping()
     ->runInBackground();
 
 Schedule::command('zoomos:import-create')
-    ->dailyAt('04:00')
+    ->dailyAt('03:00')
     ->withoutOverlapping()
     ->runInBackground();
 
 Schedule::command('zoomos:import-update')
-    ->hourly()
+    ->hourlyAt('20')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Schedule::command('excel:import-share-category-map --deactivate-others')
+//     ->everyMinute()
+//     ->withoutOverlapping()
+//     ->runInBackground();
