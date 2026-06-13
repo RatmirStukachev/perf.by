@@ -25,7 +25,6 @@ def parse_product(url, category):
         return
 
     title = soup.title.text.strip() if soup.title else "Unknown Product"
-    # Often site titles have suffix like ' - купить...'
     title = title.split(' - ')[0].strip()
 
     price_val = Decimal('0.00')
@@ -54,7 +53,6 @@ def parse_product(url, category):
     img_url = ""
     img = soup.find('img', class_=lambda c: c and 'product' in c.lower() and 'image' in c.lower())
     if not img:
-        # Check all images on page, find largest or first one that looks like product
         imgs = soup.find_all('img', src=re.compile(r'/files/products/.*'))
         if imgs:
             img_url = imgs[0].get('src')
@@ -64,7 +62,6 @@ def parse_product(url, category):
     if img_url and not img_url.startswith('http'):
         img_url = BASE_URL + img_url
 
-    # Generate a deterministic ID based on URL
     import hashlib
     url_hash = int(hashlib.md5(url.encode()).hexdigest()[:8], 16)
 
@@ -81,7 +78,6 @@ def parse_product(url, category):
         }
     )
 
-    # Parse characteristics
     if tabs_body:
         chars_tab = tabs_body[0]
         rows = chars_tab.find_all('li', class_='data-list__row')
@@ -92,7 +88,6 @@ def parse_product(url, category):
                 char_name = name_tag.text.strip()
                 char_val = val_tag.text.strip()
 
-                # Extract unit if possible (simple heuristic: space then letters at the end)
                 unit = ""
                 unit_match = re.search(r'\s+([а-яА-Яa-zA-Z]+)$', char_val)
                 if unit_match:
@@ -130,7 +125,6 @@ def parse_category(url, parent_category=None):
         }
     )
 
-    # We will grab all product links on the page.
     product_links = []
     for a in soup.find_all('a', href=True):
         if '/products/' in a['href'] and a.text.strip():
@@ -142,9 +136,8 @@ def parse_category(url, parent_category=None):
 
     for link in product_links:
         parse_product(link, category)
-        time.sleep(0.1) # Be nice to the server
+        time.sleep(0.1)
 
-    # Navigate pagination to get all products in this category
     paginator = soup.find('div', class_=lambda c: c and 'pagination' in c)
     if paginator:
         pages = []
@@ -173,17 +166,14 @@ def run_full_parser():
     Product.objects.all().delete()
     Characteristic.objects.all().delete()
 
-    # First, fetch the main catalog page to find ALL root categories
     soup = get_soup(BASE_URL + "/catalog")
     if not soup:
-        # Fallback to the one requested if we fail
         parse_category(BASE_URL + "/catalog/elektroinstrument")
         return
 
     cats = []
     for a in soup.find_all('a', href=True):
         if '/catalog/' in a['href'] and a['href'] != (BASE_URL + "/catalog") and a.text.strip():
-            # Exclude hash links which are usually filters or same page anchors
             if '#' not in a['href'] and '?page' not in a['href']:
                 cats.append(a['href'] if a['href'].startswith('http') else BASE_URL + a['href'])
 
@@ -192,4 +182,4 @@ def run_full_parser():
 
     for cat_url in cats:
         parse_category(cat_url)
-        time.sleep(1) # Delay between categories
+        time.sleep(1)
