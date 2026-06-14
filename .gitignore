@@ -22,3 +22,10 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/custom_supplier_api/venv/
+/custom_supplier_api/**/__pycache__/
+/custom_supplier_api/db.sqlite3
+venv/
+/custom_supplier_api/venv/
+/custom_supplier_api/**/__pycache__/
+/custom_supplier_api/db.sqlite3
