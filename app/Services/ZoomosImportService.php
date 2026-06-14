@@ -538,6 +538,22 @@ class ZoomosImportService
 
     private function resolveProductTitle(array $productData): string
     {
+        $supplierName = $productData['supplierInfo']['name']
+            ?? $productData['supplierinfo']['name']
+            ?? null;
+
+        if ($supplierName === 'Сиб-инструмент') {
+            $model = $productData['model'] ?? '';
+            $vendorName = $productData['vendor']['name'] ?? '';
+            $modelCode = $productData['modelCode'] ?? '';
+
+            preg_match('/^[а-яА-ЯёЁ\s\.]+/u', $model, $matches);
+            $russianPrefix = isset($matches[0]) ? trim($matches[0]) : '';
+
+            $parts = array_filter([$russianPrefix, $vendorName, $modelCode], 'strlen');
+            return implode(' ', $parts);
+        }
+
         $supplierModel = $productData['supplierInfo']['model']
             ?? $productData['supplierinfo']['model']
             ?? null;
