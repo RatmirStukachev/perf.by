@@ -1,0 +1,8 @@
+{% extends "admin/index.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'trigger_parser' %}" class="button" target="_blank" style="background:var(--button-bg);color:var(--button-fg);padding:10px 20px;display:inline-block;text-align:center;font-weight:bold;text-decoration:none;border-radius:4px;">🚀 ЗАПУСТИТЬ ПАРСЕР ПОСТАВЩИКА</a>
+    <p style="margin-top: 10px; color: #666;">Нажмите на эту кнопку, чтобы начать сбор данных с сайта поставщика (Сиб-инструмент). Процесс будет идти в фоновом режиме.</p>
+</div>
+{{ block.super }}
+{% endblock %}
