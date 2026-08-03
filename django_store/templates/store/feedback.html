@@ -1,0 +1,29 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Обратная связь{% endblock %}
+
+{% block content %}
+    <h1>Обратная связь</h1>
+
+    <div style="background: #fff; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+        <p>Если у вас есть вопросы или предложения, пожалуйста, свяжитесь с нами.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Имя</label>
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label>Сообщение</label>
+                {{ form.message }}
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Отправить</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Заказ оформлен{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-top: 50px;">
+        <h1 style="color: green; margin-bottom: 20px;">Спасибо за ваш заказ!</h1>
+        <p style="font-size: 1.2rem;">Ваш заказ <strong>#{{ order.id }}</strong> успешно оформлен.</p>
+        <p>Мы отправили подтверждение на ваш email.</p>
+
+        <div style="margin-top: 40px;">
+            <a href="{% url 'store:home' %}" class="btn">Вернуться на главную</a>
+        </div>
+    </div>
+{% endblock %}
