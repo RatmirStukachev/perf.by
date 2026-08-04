@@ -10,29 +10,34 @@ logger = logging.getLogger(__name__)
 class ZoomosService:
     def __init__(self):
         self.api_url = os.environ.get('ZOOMOS_API_URL', 'https://api.zoomos.by').rstrip('/')
-        self.api_key = os.environ.get('ZOOMOS_API_KEY')
+        self.api_key = os.environ.get('ZOOMOS_API_KEY', '')
         self.session = requests.Session()
-        self.base_params = {
-            'key': self.api_key,
-        }
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'application/json'
+        })
 
     def _get(self, endpoint, extra_params=None):
-        # Allow passing full URL for local dev mock API, otherwise construct from api_url
         if endpoint.startswith('http'):
             url = endpoint
         else:
-            url = f"{self.api_url}/{endpoint}"
+            # Construct URL manually to avoid requests URL-encoding characters like ~ in the key which might cause 500
+            url = f"{self.api_url}/{endpoint}?key={self.api_key}"
 
-        params = self.base_params.copy()
+        params = {}
         if extra_params:
             params.update(extra_params)
 
         try:
+            print(f"Requesting Zoomos API: {url}")
             response = self.session.get(url, params=params, timeout=60)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
             logger.error(f"Zoomos API Request failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Error Response Body: {e.response.text}")
+            print(f"Request failed: {e}")
             return None
         except ValueError:
             logger.error(f"Zoomos API returned non-JSON response from {url}")
@@ -53,7 +58,6 @@ class ZoomosService:
             return 0
 
         count = 0
-        # Check structure based on standard mock API structure
         data = brands_data.get('data', brands_data) if isinstance(brands_data, dict) else brands_data
 
         if isinstance(data, list):
@@ -83,7 +87,6 @@ class ZoomosService:
         data = categories_data.get('data', categories_data) if isinstance(categories_data, dict) else categories_data
 
         if isinstance(data, list):
-            # First pass: create all categories
             for item in data:
                 cat_id = str(item.get('id', ''))
                 name = item.get('name', item.get('title', ''))
@@ -104,7 +107,6 @@ class ZoomosService:
                 )
                 count += 1
 
-            # Second pass: set parents
             for cat in Category.objects.exclude(zoomos_parent_id__isnull=True).exclude(zoomos_parent_id=''):
                 parent = Category.objects.filter(zoomos_id=cat.zoomos_parent_id).first()
                 if parent:
@@ -138,7 +140,6 @@ class ZoomosService:
                 if not name or not product_id:
                     continue
 
-                # Resolve Category and Brand
                 category = Category.objects.filter(zoomos_id=cat_id).first() if cat_id else None
 
                 brand = None
@@ -164,7 +165,6 @@ class ZoomosService:
                 if created:
                     count += 1
 
-                # Process characteristics if they exist in the payload
                 chars_data = item.get('characteristics', item.get('features', []))
                 if chars_data and isinstance(chars_data, list):
                     for char in chars_data:
