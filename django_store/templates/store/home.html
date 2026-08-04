@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section>
+    <h2>Хиты продаж</h2>
+    <div class="product-grid">
+        {% for product in hits %}
+            {% include 'store/includes/product_card.html' %}
+        {% empty %}
+            <p>Нет товаров в этой категории.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section style="margin-top: 3rem;">
+    <h2>Новинки</h2>
+    <div class="product-grid">
+        {% for product in new_products %}
+            {% include 'store/includes/product_card.html' %}
+        {% empty %}
+            <p>Нет новинок.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+<div class="product-card">
+    <a href="{% url 'store:product_detail' product.slug %}">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-image">
+        {% else %}
+            <div class="product-image"></div>
+        {% endif %}
+        <h3 class="product-title">{{ product.title }}</h3>
+    </a>
+    <div class="product-price">{{ product.price }} BYN</div>
+    <form action="{% url 'store:cart_add' product.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="width: 100%;">В корзину</button>
+    </form>
+</div>

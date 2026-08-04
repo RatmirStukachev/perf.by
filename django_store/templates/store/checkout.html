@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Оформление заказа</h1>
+<div style="display: flex; gap: 3rem;">
+    <div style="flex: 2;">
+        <form method="post" style="background: var(--bg-main); padding: 2rem; border-radius: 8px;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Имя *</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Телефон *</label>
+                <input type="tel" id="phone" name="phone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="address">Адрес доставки</label>
+                <input type="text" id="address" name="address" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="comment">Комментарий к заказу</label>
+                <textarea id="comment" name="comment" class="form-control" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Подтвердить заказ</button>
+        </form>
+    </div>
+
+    <div style="flex: 1;">
+        <div style="background: var(--bg-main); padding: 2rem; border-radius: 8px;">
+            <h3 style="margin-bottom: 1.5rem;">Ваш заказ</h3>
+            <ul style="list-style: none; margin-bottom: 1.5rem;">
+                {% for item in cart %}
+                <li style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                    <span>{{ item.product.title }} x {{ item.quantity }}</span>
+                    <span>{{ item.total_price }} BYN</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.25rem;">
+                <span>Итого:</span>
+                <span>{{ cart.get_total_price }} BYN</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

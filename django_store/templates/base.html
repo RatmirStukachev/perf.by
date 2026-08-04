@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Магазин{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-inner">
+            <nav class="nav-links">
+                <a href="{% url 'store:home' %}">Главная</a>
+                <a href="{% url 'store:catalog' %}">Каталог</a>
+            </nav>
+
+            <div class="header-actions">
+                <form action="{% url 'store:search' %}" method="get" class="search-form">
+                    <input type="text" name="q" placeholder="Поиск..." class="search-input" value="{{ request.GET.q }}">
+                    <button type="submit" class="btn" style="border-radius: 0 4px 4px 0;">Найти</button>
+                </form>
+                <a href="{% url 'store:cart_detail' %}" class="btn">Корзина</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %}. Все права защищены.</p>
+        </div>
+    </footer>
+</body>
+</html>

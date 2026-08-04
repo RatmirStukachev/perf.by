@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Корзина</h1>
+{% if cart|length > 0 %}
+    <table class="cart-table" style="margin-bottom: 2rem;">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Кол-во</th>
+                <th>Сумма</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+                <tr>
+                    <td>
+                        <a href="{% url 'store:product_detail' item.product.slug %}">{{ item.product.title }}</a>
+                    </td>
+                    <td>{{ item.price }} BYN</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.total_price }} BYN</td>
+                    <td style="text-align: right;">
+                        <form action="{% url 'store:cart_remove' item.product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right; font-weight: bold;">Итого:</td>
+                <td colspan="2" style="font-weight: bold;">{{ cart.get_total_price }} BYN</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div style="display: flex; justify-content: space-between;">
+        <a href="{% url 'store:cart_clear' %}" class="btn btn-secondary">Очистить корзину</a>
+        <a href="{% url 'store:checkout' %}" class="btn">Оформить заказ</a>
+    </div>
+{% else %}
+    <p>Ваша корзина пуста. <a href="{% url 'store:catalog' %}" style="color: var(--primary-color);">Перейти в каталог</a></p>
+{% endif %}
+{% endblock %}
