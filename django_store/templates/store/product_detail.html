@@ -1,0 +1,52 @@
+{% extends 'store/base.html' %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+    <div style="display: flex; gap: 40px; margin-top: 20px;">
+        <div style="flex: 1; text-align: center; background: #fff; padding: 20px; border-radius: 8px;">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.title }}" style="max-width: 100%; border-radius: 4px;">
+            {% else %}
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 4px;">Нет фото</div>
+            {% endif %}
+        </div>
+        <div style="flex: 1;">
+            <h1>{{ product.title }}</h1>
+
+            <p><strong>Артикул:</strong> {{ product.article|default:"-" }}</p>
+            {% if product.brand %}
+                <p><strong>Бренд:</strong> {{ product.brand.title }}</p>
+            {% endif %}
+            <p><strong>Категория:</strong> <a href="{% url 'store:catalog' %}?category={{ product.category_id }}" style="color: var(--primary-hover);">{{ product.category.title }}</a></p>
+
+            <div style="font-size: 2rem; color: var(--primary-hover); font-weight: bold; margin: 20px 0;">
+                {{ product.price }} руб.
+            </div>
+
+            <form action="{% url 'store:cart_add' product.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="font-size: 1.1rem; padding: 15px 30px;">Добавить в корзину</button>
+            </form>
+
+            <div style="margin-top: 40px;">
+                <h3>Описание</h3>
+                <p>{{ product.desc|default:"Описание отсутствует." }}</p>
+            </div>
+
+            {% if product.characteristic_values.exists %}
+            <div style="margin-top: 40px;">
+                <h3>Характеристики</h3>
+                <table class="table" style="background: transparent;">
+                    {% for char_val in product.characteristic_values.all %}
+                        <tr>
+                            <td>{{ char_val.characteristic.title }}</td>
+                            <td><strong>{{ char_val.value }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

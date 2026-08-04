@@ -1,0 +1,65 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Каталог{% endblock %}
+
+{% block content %}
+    <div style="display: flex; gap: 30px;">
+        <!-- Sidebar filters -->
+        <aside style="width: 250px;">
+            <h3>Категории</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 10px;">
+                    <a href="{% url 'store:catalog' %}" style="{% if not request.GET.category %}font-weight: bold; color: var(--primary-hover);{% endif %}">
+                        Все товары
+                    </a>
+                </li>
+                {% for cat in categories %}
+                    <li style="margin-bottom: 10px;">
+                        <a href="?category={{ cat.id }}" style="{% if request.GET.category == cat.id|stringformat:'s' %}font-weight: bold; color: var(--primary-hover);{% endif %}">
+                            {{ cat.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Product list -->
+        <div style="flex: 1;">
+            <h1>Каталог {% if query %}(Поиск: {{ query }}){% endif %}</h1>
+            <div class="grid">
+                {% for product in products %}
+                    <div class="card">
+                        <a href="{% url 'store:product_detail' product.slug|default:product.id %}" class="card-img">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                            {% else %}
+                                <span>Нет фото</span>
+                            {% endif %}
+                        </a>
+                        <a href="{% url 'store:product_detail' product.slug|default:product.id %}" class="card-title">{{ product.title }}</a>
+                        <div class="card-price">{{ product.price }} руб.</div>
+                        <form action="{% url 'store:cart_add' product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="width: 100%;">В корзину</button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p>Товары не найдены.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div style="margin-top: 30px; text-align: center;">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="btn btn-outline">Назад</a>
+                    {% endif %}
+                    <span style="margin: 0 15px;">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="btn btn-outline">Вперед</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

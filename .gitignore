@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+django_store/staticfiles/
+django_store/db.sqlite3
+django_store/.env
+__pycache__/
+*.pyc
+django_store/staticfiles/
+django_store/db.sqlite3
+django_store/.env
+__pycache__/
+*.pyc

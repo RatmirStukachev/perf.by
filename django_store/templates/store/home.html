@@ -1,0 +1,29 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+    <h1>Добро пожаловать</h1>
+    <p>Здесь вы найдете лучшие товары.</p>
+
+    <h2 style="margin-top: 40px;">Новинки</h2>
+    <div class="grid">
+        {% for product in latest_products %}
+            <div class="card">
+                <a href="{% url 'store:product_detail' product.slug %}" class="card-img">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                    {% else %}
+                        <span>Нет фото</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'store:product_detail' product.slug %}" class="card-title">{{ product.title }}</a>
+                <div class="card-price">{{ product.price }} руб.</div>
+                <form action="{% url 'store:cart_add' product.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" style="width: 100%;">В корзину</button>
+                </form>
+            </div>
+        {% empty %}
+            <p>Товаров пока нет.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
