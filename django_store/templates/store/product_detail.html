@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; gap: 3rem; background: var(--bg-main); padding: 2rem; border-radius: 8px;">
+    <div style="flex: 1;">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.title }}" style="width: 100%; max-width: 400px; height: auto;">
+        {% else %}
+            <div style="width: 100%; height: 400px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center;">
+                Нет фото
+            </div>
+        {% endif %}
+    </div>
+    <div style="flex: 1;">
+        <h1 style="margin-bottom: 0.5rem;">{{ product.title }}</h1>
+        {% if product.sku %}
+            <div style="color: var(--text-muted); margin-bottom: 1.5rem;">Артикул: {{ product.sku }}</div>
+        {% endif %}
+
+        <div style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">
+            {{ product.price }} BYN
+        </div>
+
+        <form action="{% url 'store:cart_add' product.id %}" method="post" style="margin-bottom: 2rem;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity|default:99 }}" class="form-control" style="width: 80px;">
+                <button type="submit" class="btn" style="padding: 0.75rem 2rem;">В корзину</button>
+            </div>
+        </form>
+
+        {% if product.description %}
+            <h3 style="margin-top: 2rem;">Описание</h3>
+            <p>{{ product.description }}</p>
+        {% endif %}
+
+        {% if characteristics %}
+            <h3 style="margin-top: 2rem;">Характеристики</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                {% for char in characteristics %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 0.5rem 0; color: var(--text-muted);">{{ char.characteristic.title }}</td>
+                    <td style="padding: 0.5rem 0; text-align: right;">{{ char.value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

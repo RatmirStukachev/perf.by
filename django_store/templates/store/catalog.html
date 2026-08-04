@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Каталог</h1>
+<div style="display: flex; gap: 2rem;">
+    <aside style="width: 250px; flex-shrink: 0;">
+        <ul style="list-style: none;">
+            {% for cat in all_categories %}
+                <li style="margin-bottom: 0.5rem;">
+                    <a href="{% url 'store:category_detail' cat.slug %}" style="display: block; padding: 0.5rem; border-radius: 4px; background: {% if category and category.id == cat.id %}var(--primary-color){% else %}var(--bg-main){% endif %};">
+                        {{ cat.title }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </aside>
+    <div style="flex-grow: 1;">
+        <div class="product-grid">
+            {% for product in products %}
+                {% include 'store/includes/product_card.html' %}
+            {% empty %}
+                <p>В этой категории пока нет товаров.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
